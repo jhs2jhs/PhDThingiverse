@@ -1,12 +1,10 @@
-import httplib2
+from myutil import conn, http
 import socks
 import urllib
 import re
 from BeautifulSoup import Tag, NavigableString, BeautifulSoup
+import db_insert
 
-http = httplib2.Http()
-#httplib2.debuglevel = 4
-#http = httplib2.Http(proxy_info = httplib2.ProxyInfo(socks.PROXY_TYPE_HTTP, '128.243.253.109', 8080))
 
 def test():
     print "web read test"
@@ -22,12 +20,52 @@ def test():
     print response
     #print content
 
+def page_insert(page_dict):
+    if page_dict['author_url'] == 1:
+        author_id = db_insert.people_check(page_dict['author_url'])
+    print author_id, "}}}}}}"
+        
+    
+
+
 def s_work_in_progress(soup):
     lists = soup.findAll("div", attrs={'class':'BaseStatus'})
     if lists:
-        print "working in progress"
+        #print "working in progress"
         #print lists
+        return 0 # working n progress
+    else:
+        return 1 # finished
 
+def s_thing_meta(soup, page_dict):
+    lists = soup.findAll('div', attrs={'id':'thing-meta'})
+    #print len(lists)
+    if lists:
+        author_url = lists[0].contents[3].contents[1].contents[1].contents[1].contents[1]['href']#author name
+        page_dict['author_url'] = author_url
+        #author_id = db_insert.people_check(author_url)
+        #author_id = db_insert.people_check('http://www.thingiverse.com/Mjolnir')
+        #print "author_id:", author_id
+        #print lists[0].contents
+        thing_name = lists[0].contents[1].contents[0]#thing name
+        page_dict['thing_name'] = thing_name
+        #print thing_name
+        created_time = lists[0].contents[3].contents[1].contents[3].contents[0]
+        created_time = created_time.strip("\n\tCreated on")
+        #created_time = created_time.strip("\t")
+        status = s_work_in_progress(soup)
+        url = "http://www.thingiverse.com/thing:"#+str(index)
+        author_id = 1
+        thing_id = db_insert.thing_insert(url, status, thing_name, author_id, created_time)
+        #print thing_id
+        description = lists[0].contents[5]
+        #print type(description), "****"
+        db_insert.description_insert(thing_id, str(description))
+        return page_dict
+
+
+
+    
 def s_gallery_images(soup):
     lists = soup.findAll('div', attrs={'id':'thing-gallery'})
     print len(lists)
@@ -43,20 +81,6 @@ def s_gallery_images(soup):
                 print l.contents[1]['href']
                 # all the image link
     
-def s_thing_meta(soup):
-    lists = soup.findAll('div', attrs={'id':'thing-meta'})
-    print len(lists)
-    thing_name = lists[0].contents[1].contents[0]#thing name
-    print thing_name
-    author_name = lists[0].contents[3].contents[1].contents[1].contents[1].contents[1]['href']#author name
-    print author_name
-    created_time = lists[0].contents[3].contents[1].contents[3].contents[0]
-    created_time = created_time.strip("\n\tCreated on")
-    #created_time = created_time.strip("\t")
-    #created_time = created_time.strip("Created on")
-    print "created on:"+created_time
-    description = lists[0].contents[5]
-    #print description
 
 def s_thing_widget(soup):# more example would come back later
     lists = soup.findAll('div', attrs={'id':'facebook_share_button'})
@@ -139,7 +163,7 @@ def s_made_one(soup):
                 lists_derived = l.contents[3].contents
                 for lm in lists_derived:
                     if type(lm) == Tag:
-                        derived_href = lm.contents[1]['href']
+                        derived_href = lm.contents1[1]['href']
                         print derived_href
                         print "********"
                         
@@ -161,19 +185,21 @@ def s_license(soup):
     if lists[0]:
         print lists[0].contents[1]['href']
 
-def content_script(content):
+def content_script(content, index):
     soup = BeautifulSoup(content)
-    s_work_in_progress(soup)
-    s_gallery_images(soup)
-    s_thing_meta(soup)
-    s_thing_widget(soup)
-    s_thing_files(soup)
-    s_thing_instruction(soup)
-    s_comments(soup)
-    s_thing_tags(soup)
-    s_made_one(soup)
-    s_like(soup)
-    s_license(soup)
+    page_dict = {'page':'thingivers'}
+    page_dict = s_thing_meta(soup, page_dict)
+    #s_work_in_progress(soup)
+    #s_gallery_images(soup)
+    #s_thing_widget(soup)
+    #s_thing_files(soup)
+    #s_thing_instruction(soup)
+    #s_comments(soup)
+    #s_thing_tags(soup)
+    #s_made_one(soup)
+    #s_like(soup)
+    #s_license(soup)
+    page_insert(page_dict)
 
 def page_read(index):
     url_root = 'http://www.thingiverse.com/thing:'
@@ -181,7 +207,7 @@ def page_read(index):
     response, content = http.request(url, 'GET')
     if int(response['status']) != 200:
         print "**** status error when reading page: "+status
-    content_script(content)
+    content_script(content, index)
 
 def page_loop():
     index_start = 0
