@@ -137,9 +137,9 @@ def tag_insert(thing_id, tag_name):
     c.execute(sql_i, param)
     tag_id = c.fetchone()[0]
     if tag_id:
-        sql_i = 'INSERT INTO thing_tag (thing_id, tag_id) VALUES (?, ?)'
+        sql_i = 'INSERT OR IGNORE INTO thing_tag (thing_id, tag_id) VALUES (?, ?)'
         param = (thing_id, tag_id, )
-        print param
+        #print param
         c.execute(sql_i, param)
         conn.commit()
     else:
@@ -150,7 +150,7 @@ def like_insert(thing_id, follower_id):
     sql_i = 'INSERT INTO like (thing_id, follower_id) VALUES (?, ?)'
     c = conn.cursor()
     param = (thing_id, follower_id,)
-    print param
+    #print param
     c.execute(sql_i, param)
     conn.commit()
     c.close()
@@ -168,7 +168,7 @@ def license_insert(thing_id, license_url):
     if license_id:
         sql_i = 'INSERT INTO thing_license (thing_id, license_id) VALUES (?,?)'
         param = (thing_id, license_id, )
-        print param
+        #print param
         c.execute(sql_i, param)
         conn.commit()
     else:
@@ -188,7 +188,10 @@ def made_insert(thing_id, made_url):
     if int(response['status']) == 200:
         soup = BeautifulSoup(content)
         lists = soup.findAll('div', attrs={'class':'byline'})
-        #print lists[0].contents
+        #print made_url
+        #print lists[0].contents[1].contents
+        if  len(lists[0].contents[1].contents) <= 2:
+            return 
         made_time = lists[0].contents[1].contents[2].strip('onby')
         made_time = made_time.strip()
         #print made_time
@@ -198,10 +201,10 @@ def made_insert(thing_id, made_url):
         sql_i = 'INSERT INTO made (thing_id, url, made_time, made_author_id) VALUES (?,?,?,?)'
         c = conn.cursor()
         param = (thing_id, made_url, made_time, made_author_id, )
-        print param
+        #print param
         c.execute(sql_i, param)
         conn.commit()
-        print "*******"
+        #print "*******"
         c.close()
     
 

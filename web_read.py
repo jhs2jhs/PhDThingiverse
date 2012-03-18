@@ -24,7 +24,7 @@ def test():
 page_dict = {}
 
 def page_insert(page_dict):
-    print page_dict
+    #print page_dict
     if page_dict.has_key(pdl.author_url):
         author_id = db_insert.people_check(page_dict[pdl.author_url])
     #if page_dict[pdl.thing_status]:
@@ -75,7 +75,7 @@ def page_insert(page_dict):
         for m in page_dict[pdl.thing_mades]:
             made_url = m[pdl.made_url]
             db_insert.made_insert(thing_id, made_url)
-    print "page_insert::::::::", thing_id
+    #print "page_insert::::::::", thing_id
     page_dict = {}
 
 
@@ -123,7 +123,7 @@ def s_thing_meta(soup):
         created_time = created_time.strip("\n\tCreated on")
         page_dict[pdl.thing_created_time] = created_time
         description = lists[0].contents[5]
-        description = str(description)
+        description = unicode(description)
         page_dict[pdl.description] = description
         #return page_dict
 
@@ -170,7 +170,7 @@ def s_thing_widget(soup):# more example would come back later
         widget_count = lists_widget[1].contents[0]
         print widget_count
     
-def s_thing_files(soup):
+'''def s_thing_files(soup):
     lists = soup.findAll('div', attrs={'id':'thing-files'})
     #print len(lists)
     if lists:
@@ -203,6 +203,43 @@ def s_thing_files(soup):
                         pdl.file_url:file_url
                         })
         page_dict[pdl.thing_files] = files
+'''
+def s_thing_files(soup):
+    lists = soup.findAll('div', attrs={'class':'thing-file'})
+    #print len(lists)
+    if lists:
+        #i = 0
+        files = []
+        for l in lists:
+            #print l
+            if type(l) == Tag:
+                #i = i + 1
+                #print '***********'
+                #print i, l
+                #print l.contents
+                #print l['id']
+                #print l['data-adddate']
+                file_date = l['data-adddate']
+                #page_dict[pdl.file_date] = file_date #
+                file_type = l['data-filetype']
+                #page_dict[pdl.file_type] = file_type #
+                file_download = l['data-dlcount']
+                file_download = int(file_download)
+                #page_dict[pdl.file_download] = file_download #
+                #print l.contents[3].contents[1]['href']
+                file_url = l.contents[3].contents[1]['href']
+                #page_dict[pdl.file_url] = file_href #
+                file_name = l.contents[3].contents[1]['title']
+                #page_dict[pdl.file_name] = file_name #
+                files.append({
+                        pdl.file_name:file_name,
+                        pdl.file_type:file_type,
+                        pdl.file_date:file_date,
+                        pdl.file_download:file_download,
+                        pdl.file_url:file_url
+                        })
+        page_dict[pdl.thing_files] = files
+        #print files
         
 
 
@@ -211,7 +248,7 @@ def s_thing_instruction(soup):
     #print len(lists)
     if lists:
         instruments = lists[0]
-        instruments = str(instruments)
+        instruments = unicode(instruments)
         page_dict[pdl.instruction] = instruments
     #print instruments
     
@@ -300,9 +337,13 @@ def s_like(soup):
 
 def s_license(soup):
     lists = soup.findAll('div', attrs={'id':'thing-license'})
-    if lists[0]:
-        thing_license = lists[0].contents[1]['href']
-        page_dict[pdl.thing_license] = thing_license
+    if lists:
+        if lists[0]:
+            if lists[0].contents:
+                if lists[0].contents[1]:
+                    if lists[0].contents[1].has_key('rel'):
+                        thing_license = lists[0].contents[1]['href']
+                        page_dict[pdl.thing_license] = thing_license
 
 
 def content_script(content, index):
@@ -321,7 +362,7 @@ def content_script(content, index):
     s_license(soup)
     #s_thing_widget(soup)#
     #s_comments(soup, index)#
-    print page_dict
+    #print page_dict
     page_insert(page_dict)
 
 def page_read(index):
@@ -333,9 +374,7 @@ def page_read(index):
         return 
     content_script(content, index)
 
-def page_loop():
-    index_start = 0
-    index_end = 19183 # it can be finded by visiting this site: http://www.thingiverse.com/newest
+def page_loop(index_start, index_end):
     for i in range(index_start, index_end+1, 1): 
         page_read(i)
     print "finish loop page reading"
@@ -343,4 +382,4 @@ def page_loop():
 
 
 if __name__ == "__main__":
-    print "**web **"
+    print "** web **"
