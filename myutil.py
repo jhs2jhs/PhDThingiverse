@@ -8,6 +8,8 @@ conn = sqlite3.connect(sqlite_file_path)
 page_url_root = 'http://www.thingiverse.com/'
 
 class page_dict_label:
+    thing_error = 'thing_base_error' # example on: http://www.thingiverse.com/thing:5183
+
     author_url = 'author_url'
 
     thing_name = 'thing_name'

@@ -78,6 +78,14 @@ def page_insert(page_dict):
     #print "page_insert::::::::", thing_id
     page_dict = {}
 
+def s_base_error(soup, index):
+    lists = soup.findAll('div', attrs={'class':'BaseError'})
+    if lists:
+        # there is a base error, one example is: http://www.thingiverse.com/thing:5183
+        page_dict[pdl.thing_error] = 0
+        print "*** base error on thing: :"+str(index)
+    else:
+        page_dict[pdl.thing_error] = 1
 
 def s_work_in_progress(soup):
     lists = soup.findAll("div", attrs={'class':'BaseStatus'})
@@ -116,6 +124,7 @@ def s_thing_meta(soup):
         #print "lllllllllll"
         page_dict[pdl.author_url] = author_url
         thing_name = lists[0].contents[1].contents[0]#thing name
+        thing_name = unicode(thing_name)
         page_dict[pdl.thing_name] = thing_name
         created_time = lists[0].contents[3].contents[1].contents[3].contents[0]
         #print created_time
@@ -277,9 +286,9 @@ def s_thing_tags(soup):
             if type(l) == Tag:
                 tag_name = l.contents[0]['href']
                 #print tag_name
-                tag_number = l.contents[0].contents[0]
-                tag_number = re.findall('\(\d+\)', tag_number)[0]
-                tag_number = tag_number.strip('()')
+                #tag_number = l.contents[0].contents[0]
+                #tag_number = re.findall('\(\d+\)', tag_number)[0]# the number here may not exist, see thing:13661
+                #tag_number = tag_number.strip('()')
                 #tag_number = tag_number.strip(')')
                 #print tag_number
                 tags.append({
@@ -350,6 +359,9 @@ def content_script(content, index):
     soup = BeautifulSoup(content)
     print "** "+str(index)+" **"
     page_dict[pdl.thing_index]= index
+    s_base_error(soup, index)
+    if page_dict[pdl.thing_error] == 0:
+        return
     #s_thing_creator(soup)
     s_thing_meta(soup)
     s_work_in_progress(soup)
