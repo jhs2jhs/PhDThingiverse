@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS instruction (
 CREATE TABLE IF NOT EXISTS gallery_image (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   thing_id INTEGER NOT NULL,
-  image_url TEXT NOT NULL,
+  url TEXT NOT NULL,
   type INTEGER NOT NULL DEFAULT 1, -- 1 is sub thumbinal, 0 is main image in the windows
   FOREIGN KEY (thing_id) REFERENCES thing(id)
 );
@@ -79,9 +79,7 @@ CREATE TABLE IF NOT EXISTS derived (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   thing_id INTEGER NOT NULL,
   url TEXT,
-  derived_id INTEGER NOT NULL, -- check whether it has created time on original web page
-  FOREIGN KEY (thing_id) REFERENCES thing(id),
-  FOREIGN KEY (derived_id) REFERENCES thing(id)
+  FOREIGN KEY (thing_id) REFERENCES thing(id)
 );
 CREATE TABLE IF NOT EXISTS like (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -93,9 +91,9 @@ CREATE TABLE IF NOT EXISTS like (
 );
 CREATE TABLE IF NOT EXISTS license (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
-  url TEXT UNIQUE
+  url TEXT UNIQUE NOT NULL
 );
-CREATE TABLE IF NOT EXISTS license (
+CREATE TABLE IF NOT EXISTS thing_license (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   thing_id INTEGER NOT NULL,
   license_id INTEGER NOT NULL,
