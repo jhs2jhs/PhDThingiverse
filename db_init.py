@@ -81,6 +81,21 @@ CREATE TABLE IF NOT EXISTS derived (
   url TEXT,
   FOREIGN KEY (thing_id) REFERENCES thing(id)
 );
+------------------update ---------
+CREATE TABLE IF NOT EXISTS made_raw (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  x_url TEXT,
+  y_url TEXT,
+  made_time TEXT,
+  made_author_id INTEGER NOT NULL,
+  FOREIGN KEY (made_author_id) REFERENCES people(id)
+);
+CREATE TABLE IF NOT EXISTS derived_raw (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  x_url TEXT,
+  y_url TEXT
+);
+----------------update--------------
 CREATE TABLE IF NOT EXISTS like (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   thing_id INTEGER NOT NULL,

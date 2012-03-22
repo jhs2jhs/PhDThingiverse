@@ -377,6 +377,54 @@ def content_script(content, index):
     #print page_dict
     page_insert(page_dict)
 
+################################
+def s_made_derived_new(soup, page_dict):
+    #lists = soup.findAll('form', attrs={'id':'i_made_one_form'})
+    lists = soup.findAll('div', attrs={'id':'thing-made'})
+    #print len(lists)
+    #print lists
+    if lists:
+        mades = []
+        deriveds = []
+        for l in lists:
+            if l.contents[1].contents[0] == "Who's Made It?":
+                lists_made = l.contents[3].contents
+                for lm in lists_made:
+                    if type(lm) == Tag:
+                        #print lm
+                        made_href = lm.contents[1]['href']
+                        mades.append({pdl.made_url:made_href})
+                        #print made_href
+                        #print "**********"
+            if l.contents[1].contents[0] == "Who's Derived It?":
+                lists_derived = l.contents[3].contents
+                for lm in lists_derived:
+                    if type(lm) == Tag:
+                        #print lm
+                        derived_href = lm.contents[1]['href']
+                        deriveds.append({pdl.derived_url:derived_href})
+                        #print derived_href
+                        #print "***=========="
+        #page_dict[pdl.thing_mades] = mades
+        page_dict[pdl.thing_deriveds] = deriveds
+
+def page_insert_derived(page_dict, index):
+    if page_dict.has_key(pdl.thing_deriveds):
+        for d in page_dict[pdl.thing_deriveds]:
+            y_url = d[pdl.derived_url]
+            x_url = '/thing:'+str(index)
+            print (x_url, y_url)
+            db_insert.derived_insert_new(x_url, y_url)
+
+def content_script_derived(content, index):
+    soup = BeautifulSoup(content)
+    print "**"+str(index)+"**"
+    page_dict = {}
+    s_made_derived_new(soup, page_dict) #list has to passed into method, otherwise it will not recognised, and make the list massive. 
+    print str(page_dict)
+    page_insert_derived(page_dict, index)
+#################################
+
 def page_read(index):
     url_root = 'http://www.thingiverse.com/thing:'
     url = url_root+str(index)
@@ -384,7 +432,8 @@ def page_read(index):
     if int(response['status']) != 200:
         print "**** status error when reading page: "+response['status']
         return 
-    content_script(content, index)
+    #content_script(content, index) # this is the normal command
+    content_script_derived(content, index)
 
 def page_loop(index_start, index_end):
     for i in range(index_start, index_end+1, 1): 

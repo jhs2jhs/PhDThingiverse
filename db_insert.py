@@ -183,6 +183,16 @@ def derived_insert(thing_id, derived_url):
     conn.commit()
     c.close()
 
+##############################
+def derived_insert_new(x_url, y_url):
+    sql_i = 'INSERT INTO derived_raw (x_url, y_url) VALUES (?, ?)'
+    c = conn.cursor()
+    param = (x_url, y_url,)
+    c.execute(sql_i, param)
+    conn.commit()
+    c.close()
+##############################
+
 def made_insert(thing_id, made_url):
     response, content = http.request(made_url, 'GET')
     if int(response['status']) == 200:

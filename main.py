@@ -1,6 +1,7 @@
 import web_read
 import db_init
 import db_insert
+import db_analysis
 
 def db_initing():
     print "** db_initing **"
@@ -11,14 +12,18 @@ def db_initing():
 def web_reading():
     print "** web_reading **"
     #web_read.test()
-    index_start = 13661
+    index_start = 15157
     index_end = 19316 # it can be finded by visiting this site: http://www.thingiverse.com/newest
     web_read.page_loop(index_start, index_end)
     #web_read.page_read(7)
     #web_read.page_read(17773)
     print "** web_reading finish **"
 
+def db_analysising():
+    db_analysis.test()
+
 if __name__ == "__main__":
     print "** main start **"
     db_initing()
     web_reading()
+    #db_analysising()
