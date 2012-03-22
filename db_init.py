@@ -88,12 +88,14 @@ CREATE TABLE IF NOT EXISTS made_raw (
   y_url TEXT,
   made_time TEXT,
   made_author_id INTEGER NOT NULL,
-  FOREIGN KEY (made_author_id) REFERENCES people(id)
+  FOREIGN KEY (made_author_id) REFERENCES people(id),
+  UNIQUE(x_url, y_url)
 );
 CREATE TABLE IF NOT EXISTS derived_raw (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   x_url TEXT,
-  y_url TEXT
+  y_url TEXT,
+  UNIQUE (x_url, y_url)
 );
 ----------------update--------------
 CREATE TABLE IF NOT EXISTS like (

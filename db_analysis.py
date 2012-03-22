@@ -28,5 +28,16 @@ WHERE
 WHERE
   x.id = y.id
 '''
+
+sql_derived_from_x_to_y = '''
+SELECT * FROM
+(
+SELECT x_url, COUNT(y_url) AS y_count
+FROM derived_raw
+GROUP BY x_url
+) AS derived
+ORDER BY y_count DESC
+LIMIT 100
+'''
 def derived_from_x_to_y():
     print "hello"
