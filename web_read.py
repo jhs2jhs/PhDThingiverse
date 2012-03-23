@@ -5,6 +5,11 @@ import urllib
 import re
 from BeautifulSoup import Tag, NavigableString, BeautifulSoup
 import db_insert
+import Queue
+import threading
+import httplib2
+
+http = httplib2.Http()
 
 
 def test():
@@ -22,6 +27,7 @@ def test():
     #print content
 
 page_dict = {}
+queue = Queue.Queue()
 
 def page_insert(page_dict):
     #print page_dict
@@ -503,7 +509,7 @@ def page_insert_derived(page_dict, index):
             y_url = m[pdl.made_url]
             x_url = '/thing:'+str(index)
             print (x_url, y_url), "==="
-            db_insert.made_insert_new(x_url, y_url)
+            #db_insert.made_insert_new(x_url, y_url)
         #print "======== copy ==========="
     if page_dict.has_key(pdl.thing_deriveds):
         #print "***&&&&&&:"+str(len(page_dict[pdl.thing_deriveds]))
@@ -539,6 +545,41 @@ def page_loop(index_start, index_end):
     print "finish loop page reading"
         
 
+class page_read_thread(threading.Thread):
+    def __init__(self, queue):
+        threading.Thread.__init__(self)
+        self.queue = queue
+
+    def run(self):
+        #global page_url_root
+        page_url_root = 'http://www.thingiverse.com'
+        while True:
+            index = self.queue.get()
+            #print index
+            url = page_url_root+'/thing:'+str(index)
+            print url
+            response, content = http.request(url, 'GET')
+'''
+            if int(response['status']) != 200:
+                print "** thing:"+str(index)+" :status error when reading page: "+response['status']
+                return 
+    #content_script(content, index) # this is the normal command
+            content_script_derived(content, index)
+            self.queue.task_done()
+'''
+        
+def page_loop_threads(index_start, index_end):
+    for index in range(index_start, index_end+1, 1):
+        t = page_read_thread(queue)
+        t.setDaemon(True)
+        t.start()
+
+    for index in range(index_start, index_end+1, 1):
+        queue.put(index)
+
+    queue.join()
+
 
 if __name__ == "__main__":
+    page_loop_threads(1, 10)
     print "** web **"

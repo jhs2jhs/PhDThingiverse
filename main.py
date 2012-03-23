@@ -12,9 +12,10 @@ def db_initing():
 def web_reading():
     print "** web_reading **"
     #web_read.test()
-    index_start = 4148
+    index_start = 19300
     index_end = 19316 # it can be finded by visiting this site: http://www.thingiverse.com/newest
-    web_read.page_loop(index_start, index_end)
+    #web_read.page_loop(index_start, index_end)
+    web_read.page_loop_threads(index_start, index_end)
     #web_read.page_read(7)
     #web_read.page_read(17773)
     print "** web_reading finish **"
