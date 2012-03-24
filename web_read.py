@@ -8,6 +8,7 @@ import db_insert
 import Queue
 import threading
 import httplib2
+import WebFetch as fetch
 
 http = httplib2.Http()
 
@@ -112,8 +113,8 @@ def s_thing_widget(soup, page_dict):# more example would come back later
     lists = soup.findAll('div', attrs={'id':'facebook_share_button'})
     print len(lists)
     url_widget = lists[0].contents[1]['src']
-    response, content = http.request(url_widget, 'GET')
-    if int(response['status']) == 200:
+    response, content = fetch.fetchio_single(url_widget)
+    if True:
         #print content
         soup_widget = BeautifulSoup(content)
         lists_widget = soup_widget.findAll('div', attrs={'class':'connect_widget_button_count_count'})
@@ -212,7 +213,7 @@ def s_comments(soup, index, page_dict):
     #http://js-kit.com/comments-data.js?ref=http://www.thingiverse.com/thing:17773&p[0]=/thing:17773&jx[0]=0
     url = 'http://js-kit.com/comments-data.js?ref=http://www.thingiverse.com/thing:'+str(index)+'&p[0]=/thing:'+str(index)+'&jx[0]=0'
     print url
-    response, content = http.request(url, 'GET')
+    response, content = fetch.fetchio_single(url)
     print response
     print content
     if int(response['status']) == 200:
@@ -315,9 +316,7 @@ def s_made(soup, page_dict):
                         if made_count >= 20:
                             made_lists_url = l.contents[5]['href']
                             made_lists_url = page_url_root+made_lists_url
-                            response, content = http.request(made_lists_url, 'GET')
-                            if int(response['status']) != 200:
-                                print '((((made lists not existing)))'+str()
+                            response, content = fetch.fetchio_single(made_lists_url)
                             soup_lists = BeautifulSoup(content)
                             page_lists = soup_lists.findAll('div', attrs={'class':'pagination'})
                             page_lists = page_lists[0].contents[1].contents
@@ -332,9 +331,7 @@ def s_made(soup, page_dict):
                                 for page_url in range(page_first, page_last+1, 1):
                                     page_url = made_lists_url+"/page:"+str(page_url)
                                     print page_url
-                                    response, content = http.request(page_url, 'GET')
-                                    if int(response['status']) != 200:
-                                        print 'each made page is not available'
+                                    response, content = fetch.fetchio_single(page_url)
                                     soup_made = BeautifulSoup(content)
                                     made_lists = soup_made.findAll('div', attrs={'class':'things'})
                                     if len(made_lists) == 0:
@@ -372,9 +369,7 @@ def s_made(soup, page_dict):
                             derivation_lists_url = l.contents[5]['href']
                             #url_root = 'http://www.thingiverse.com'
                             derivation_lists_url = page_url_root+derivation_lists_url
-                            response, content = http.request(derivation_lists_url, 'GET')
-                            if int(response['status']) != 200:
-                                print '((((derivation lists not exisitng)))'+str()
+                            response, content = fetch.fetchio_single(derivation_lists_url)
                             soup_lists = BeautifulSoup(content)
                             page_lists = soup_lists.findAll('div', attrs={'class':'pagination'})
                             page_lists = page_lists[0].contents[1].contents
@@ -389,7 +384,7 @@ def s_made(soup, page_dict):
                                 for page_url in range(page_first, page_last+1, 1):
                                     page_url = derivation_lists_url+"/page:"+str(page_url)
                                     print page_url
-                                    response, content = http.request(page_url, 'GET')
+                                    response, content = fetch.fetchio_single(page_url)
                                     if int(response['status']) != 200:
                                         print 'each derivation page is not available'
                                     soup_derived = BeautifulSoup(content)

@@ -2,6 +2,11 @@
 from myutil import conn
 
 sql = '''
+CREATE TABLE IF NOT EXISTS error (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  url TEXT,
+  error TEXT
+);
 CREATE TABLE IF NOT EXISTS people (
   id INTEGER PRIMARY KEY AUTOINCREMENT, 
   name TEXT, 

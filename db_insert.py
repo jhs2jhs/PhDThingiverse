@@ -2,6 +2,7 @@ from myutil import conn, http, page_url_root
 from BeautifulSoup import Tag, NavigableString, BeautifulSoup
 import re
 import sys
+import WebFetch as fetch
 
 def test():
     sql = ''' SELECT * FROM SQLITE_MASTER'''
@@ -10,6 +11,13 @@ def test():
     for r in c.fetchall():
         print r
 
+
+def error_log(url, e):
+    sql_i = 'INSERT INTO TABLE error (url, error) VALUES (?,?)'
+    c = conn.cursor()
+    c.execute(sql_i, (url, e,))
+    conn.commit()
+    c.close()
 
 def people_check(url):
     sql_id = 'SELECT id FROM people WHERE url=?'
@@ -23,8 +31,11 @@ def people_check(url):
     else:
         name = ''
         register_time = ''
-        response, content = http.request(url, 'GET')
-        if int(response['status']) == 200:
+        response, content = fetch.fetchio_single(url)
+        #print content
+        if True:
+        #response, content = http.request(url, 'GET')
+        #if int(response['status']) == 200:
             soup = BeautifulSoup(content)
             lists = soup.findAll('div', attrs={'id':'user-meta'})
             if lists:
@@ -193,9 +204,9 @@ def derived_insert(x_url, y_url):
 
 def made_insert(x_url, y_url):
     url = y_url;
-    #print "**", url, "**"
-    response, content = http.request(url, 'GET')
-    if int(response['status']) == 200:
+    print "**", url, "**"
+    response, content = fetch.fetchio_single(url)
+    if True:
         soup = BeautifulSoup(content)
         lists = soup.findAll('div', attrs={'class':'byline'})
         #print made_url

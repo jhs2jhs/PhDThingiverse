@@ -148,10 +148,19 @@ class FetcherIO:
             self.q_req.task_done()
             time.sleep(0.1) # don't spam
 
-def fetchio_single(url, web_scriptor): # need to be modify
-    f = FetcherIO(threads=1, get_retrives=3, web_scriptor=web_scriptor)
+def single_get(ans, req):
+    return {'content':ans}
+
+def fetchio_single(url): # need to be modify
+    f = FetcherIO(threads=1, get_retrives=3, web_scriptor=single_get)
     f.push(url)
-    f.start()
+    #content = {}
+    while f.taskleft():
+        url, content = f.pop()
+    if content.has_key('content'):
+        return (url, content['content'])
+    else:
+        return (url, '')
 
 def fetchio_multi(links, threads, web_scriptor, web_processor):
     f = FetcherIO(threads=threads, get_retrives=3, web_scriptor=web_scriptor)
