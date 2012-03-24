@@ -64,7 +64,7 @@ def people_check(url):
 
 
 def thing_insert(url, status, name, author_id, created_time):# default value for status is 1 which is in finished status
-    sql_i = 'INSERT INTO thing (url, status, name, author_id, created_time) VALUES (?,?,?,?,?)'
+    sql_i = 'INSERT OR IGNORE INTO thing (url, status, name, author_id, created_time) VALUES (?,?,?,?,?)'
     param = (url, status, name, author_id, created_time, )
     #print param
     c = conn.cursor()
@@ -183,8 +183,7 @@ def derived_insert(thing_id, derived_url):
     conn.commit()
     c.close()
 
-##############################
-def derived_insert_new(x_url, y_url):
+def derived_insert(x_url, y_url):
     sql_i = 'INSERT OR IGNORE INTO derived_raw (x_url, y_url) VALUES (?, ?)'
     c = conn.cursor()
     param = (x_url, y_url,)
@@ -192,9 +191,9 @@ def derived_insert_new(x_url, y_url):
     conn.commit()
     c.close()
 
-def made_insert_new(x_url, y_url):
-    url = page_url_root+y_url;
-    print url
+def made_insert(x_url, y_url):
+    url = y_url;
+    #print "**", url, "**"
     response, content = http.request(url, 'GET')
     if int(response['status']) == 200:
         soup = BeautifulSoup(content)
@@ -212,31 +211,6 @@ def made_insert_new(x_url, y_url):
         sql_i = 'INSERT OR IGNORE INTO made_raw (x_url, y_url, made_time, made_author_id) VALUES (?,?,?,?)'
         c = conn.cursor()
         param = (x_url, y_url, made_time, made_author_id, )
-        #print param
-        c.execute(sql_i, param)
-        conn.commit()
-        #print "*******"
-        c.close()
-##############################
-
-def made_insert(thing_id, made_url):
-    response, content = http.request(made_url, 'GET')
-    if int(response['status']) == 200:
-        soup = BeautifulSoup(content)
-        lists = soup.findAll('div', attrs={'class':'byline'})
-        #print made_url
-        #print lists[0].contents[1].contents
-        if  len(lists[0].contents[1].contents) <= 2:
-            return 
-        made_time = lists[0].contents[1].contents[2].strip('onby')
-        made_time = made_time.strip()
-        #print made_time
-        made_author = lists[0].contents[3]['href']
-        made_author_id = people_check(made_author)
-        #print made_author
-        sql_i = 'INSERT INTO made (thing_id, url, made_time, made_author_id) VALUES (?,?,?,?)'
-        c = conn.cursor()
-        param = (thing_id, made_url, made_time, made_author_id, )
         #print param
         c.execute(sql_i, param)
         conn.commit()

@@ -15,8 +15,7 @@ CREATE TABLE IF NOT EXISTS thing (
   name TEXT, 
   author_id INTEGER NOT NULL,
   created_time TEXT,
-  FOREIGN KEY (author_id) REFERENCES people(id),
-  UNIQUE(url)
+  FOREIGN KEY (author_id) REFERENCES people(id)
 );
 CREATE TABLE IF NOT EXISTS description (
   id INTEGER PRIMARY KEY AUTOINCREMENT, 

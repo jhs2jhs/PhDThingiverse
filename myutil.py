@@ -2,10 +2,10 @@ import httplib2
 http = httplib2.Http()
 
 import sqlite3
-sqlite_file_path = './db/thingiver.db_temp'
+sqlite_file_path = './db/thingiver.db'
 conn = sqlite3.connect(sqlite_file_path)
 
-page_url_root = 'http://www.thingiverse.com/'
+page_url_root = 'http://www.thingiverse.com'
 
 class page_dict_label:
     thing_error = 'thing_base_error' # example on: http://www.thingiverse.com/thing:5183

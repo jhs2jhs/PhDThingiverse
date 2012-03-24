@@ -24,7 +24,7 @@ def web_reading():
 
 def web_reading_threads():
     links = ['http://www.thingiverse.com/thing:%d' %i for i in range (1, 20000)]
-    fetch.fetchio_multi(links, 50, web_read.content_script_derived, web_processor.page_insert_derived)
+    fetch.fetchio_multi(links, 50, web_read.content_scripting, web_processor.page_processing)
     
 
 def db_analysising():

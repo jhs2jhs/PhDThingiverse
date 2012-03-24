@@ -26,65 +26,7 @@ def test():
     print response
     #print content
 
-page_dict = {}
-queue = Queue.Queue()
-
-def page_insert(page_dict):
-    #print page_dict
-    if page_dict.has_key(pdl.author_url):
-        author_id = db_insert.people_check(page_dict[pdl.author_url])
-    #if page_dict[pdl.thing_status]:
-    #    thing_status = page_dict[pdl.thing_status]
-    if page_dict.has_key(pdl.thing_name) and page_dict.has_key(pdl.thing_created_time) and page_dict.has_key(pdl.thing_index) and page_dict.has_key(pdl.thing_created_time):
-        thing_url = "/thing:"+str(page_dict[pdl.thing_index])
-        thing_status = page_dict.get(pdl.thing_status, 1)
-        thing_name = page_dict[pdl.thing_name]
-        thing_created_time = page_dict[pdl.thing_created_time]
-        thing_id = db_insert.thing_insert(thing_url, thing_status, thing_name, author_id, thing_created_time)
-    if page_dict.has_key(pdl.description):
-        description = page_dict[pdl.description]
-        db_insert.description_insert(thing_id, description)
-    if page_dict.has_key(pdl.instruction):
-        instruction = page_dict[pdl.instruction]
-        db_insert.instruction_insert(thing_id, instruction)
-    if page_dict.has_key(pdl.thing_images):
-        for image in page_dict[pdl.thing_images]:
-            image_url = image[pdl.thing_image_url]
-            image_type = image[pdl.thing_image_type]
-            db_insert.image_insert(thing_id, image_url, image_type)
-    if page_dict.has_key(pdl.thing_files):
-        for f in page_dict[pdl.thing_files]:
-            #print f
-            file_type = f[pdl.file_type]
-            file_name = f[pdl.file_name]
-            file_date = f[pdl.file_date]
-            file_url = f[pdl.file_url]
-            file_download = f[pdl.file_download]
-            db_insert.file_insert(thing_id, file_type, file_url, file_date, file_name, file_download)
-    if page_dict.has_key(pdl.thing_tags):
-        for t in page_dict[pdl.thing_tags]:
-            tag_name = t[pdl.tag_name]
-            db_insert.tag_insert(thing_id, tag_name)
-    if page_dict.has_key(pdl.thing_likes):
-        for l in page_dict[pdl.thing_likes]:
-            follower_url = l[pdl.follower_url]
-            follower_id = db_insert.people_check(follower_url)
-            db_insert.like_insert(thing_id, follower_id)
-    if page_dict.has_key(pdl.thing_license):
-        thing_license = page_dict[pdl.thing_license]
-        db_insert.license_insert(thing_id, thing_license)
-    if page_dict.has_key(pdl.thing_deriveds):
-        for d in page_dict[pdl.thing_deriveds]:
-            derived_url = d[pdl.derived_url]
-            db_insert.derived_insert(thing_id, derived_url)
-    if page_dict.has_key(pdl.thing_mades):
-        for m in page_dict[pdl.thing_mades]:
-            made_url = m[pdl.made_url]
-            db_insert.made_insert(thing_id, made_url)
-    #print "page_insert::::::::", thing_id
-    page_dict = {}
-
-def s_base_error(soup, index):
+def s_base_error(soup, index, page_dict):
     lists = soup.findAll('div', attrs={'class':'BaseError'})
     if lists:
         # there is a base error, one example is: http://www.thingiverse.com/thing:5183
@@ -93,7 +35,7 @@ def s_base_error(soup, index):
     else:
         page_dict[pdl.thing_error] = 1
 
-def s_work_in_progress(soup):
+def s_work_in_progress(soup, page_dict):
     lists = soup.findAll("div", attrs={'class':'BaseStatus'})
     if lists:
         #print "working in progress"
@@ -104,14 +46,7 @@ def s_work_in_progress(soup):
         #return 1 # finished
         page_dict[pdl.thing_status] = 1
 
-def s_thing_creator(soup):
-    lists = soup.findAll('div', attrs={'id':'thing-creator'})
-    if lists:
-        author_name = lists
-        print author_name
-        print "00000000000"
-
-def s_thing_meta(soup):
+def s_thing_meta(soup, page_dict):
     lists = soup.findAll('div', attrs={'id':'thing-meta'})
     #print len(lists)
     if lists:
@@ -145,7 +80,7 @@ def s_thing_meta(soup):
 
 
     
-def s_gallery_images(soup):
+def s_gallery_images(soup, page_dict):
     images = []
     lists = soup.findAll('div', attrs={'id':'thing-gallery'})
     #print len(lists)
@@ -173,7 +108,7 @@ def s_gallery_images(soup):
     page_dict[pdl.thing_images] = images
     
 
-def s_thing_widget(soup):# more example would come back later
+def s_thing_widget(soup, page_dict):# more example would come back later
     lists = soup.findAll('div', attrs={'id':'facebook_share_button'})
     print len(lists)
     url_widget = lists[0].contents[1]['src']
@@ -219,7 +154,7 @@ def s_thing_widget(soup):# more example would come back later
                         })
         page_dict[pdl.thing_files] = files
 '''
-def s_thing_files(soup):
+def s_thing_files(soup, page_dict):
     lists = soup.findAll('div', attrs={'class':'thing-file'})
     #print len(lists)
     if lists:
@@ -258,7 +193,7 @@ def s_thing_files(soup):
         
 
 
-def s_thing_instruction(soup):
+def s_thing_instruction(soup, page_dict):
     lists = soup.findAll('div', attrs={'id':'thing-instructions'})
     #print len(lists)
     if lists:
@@ -267,7 +202,7 @@ def s_thing_instruction(soup):
         page_dict[pdl.instruction] = instruments
     #print instruments
     
-def s_comments(soup, index):
+def s_comments(soup, index, page_dict):
     #lists = soup.findAll('div', attrs={'id':'thing-comments'})
     #print len(lists)
     #print lists
@@ -283,7 +218,7 @@ def s_comments(soup, index):
     if int(response['status']) == 200:
         print content
 
-def s_thing_tags(soup):
+def s_thing_tags(soup, page_dict):
     lists = soup.findAll('li', attrs={'class':'tag_display'})
     #print len(lists)
     if lists:
@@ -302,7 +237,7 @@ def s_thing_tags(soup):
                         })
         page_dict[pdl.thing_tags] = tags
 
-def s_made_one(soup):
+def s_made_one(soup, page_dict):
     #lists = soup.findAll('form', attrs={'id':'i_made_one_form'})
     lists = soup.findAll('div', attrs={'id':'thing-made'})
     #print len(lists)
@@ -333,7 +268,7 @@ def s_made_one(soup):
         page_dict[pdl.thing_deriveds] = deriveds
                         
                         
-def s_like(soup):
+def s_like(soup, page_dict):
     lists = soup.findAll('div', attrs={'id':'thing-like'})
     #print lists[0].contents
     #print "============="
@@ -350,7 +285,7 @@ def s_like(soup):
                         #print "******"
         page_dict[pdl.thing_likes] = likes
 
-def s_license(soup):
+def s_license(soup, page_dict):
     lists = soup.findAll('div', attrs={'id':'thing-license'})
     if lists:
         if lists[0]:
@@ -361,30 +296,7 @@ def s_license(soup):
                         page_dict[pdl.thing_license] = thing_license
 
 
-def content_script(content, index):
-    soup = BeautifulSoup(content)
-    print "** "+str(index)+" **"
-    page_dict[pdl.thing_index]= index
-    s_base_error(soup, index)
-    if page_dict[pdl.thing_error] == 0:
-        return
-    #s_thing_creator(soup)
-    s_thing_meta(soup)
-    s_work_in_progress(soup)
-    s_gallery_images(soup)
-    s_thing_files(soup)
-    s_thing_instruction(soup)
-    s_thing_tags(soup)
-    s_made_one(soup)
-    s_like(soup)
-    s_license(soup)
-    #s_thing_widget(soup)#
-    #s_comments(soup, index)#
-    #print page_dict
-    page_insert(page_dict)
-
-################################
-def s_made_derived_new(soup, page_dict):
+def s_made(soup, page_dict):
     #lists = soup.findAll('form', attrs={'id':'i_made_one_form'})
     lists = soup.findAll('div', attrs={'id':'thing-made'})
     #print len(lists)
@@ -516,15 +428,32 @@ def s_made_derived_new(soup, page_dict):
 
 
 
-def content_script_derived(content, req):
+def content_scripting(content, req):
     index = req.strip('\n\thttp://www.thingiverse.com/thing:')
     index = int(index)
     soup = BeautifulSoup(content)
-    print "**"+str(index)+"**"
-    page_dict = {}
-    s_made_derived_new(soup, page_dict) #list has to passed into method, otherwise it will not recognised, and make the list massive. 
+    pagedict = {}
+    s_base_error(soup, index, pagedict)
+    if pagedict[pdl.thing_error] == 0:
+        return
+    s_thing_meta(soup, pagedict)
+    pagedict[pdl.thing_index] = index
+    #print pagedict, "==="
+    s_work_in_progress(soup, pagedict)
+    s_gallery_images(soup, pagedict)
+    s_thing_files(soup, pagedict)
+    s_thing_instruction(soup, pagedict)
+    s_thing_tags(soup, pagedict)
+    s_made_one(soup, pagedict)
+    s_like(soup, pagedict)
+    s_license(soup, pagedict)
+    s_made(soup, pagedict) #list has to passed into method, otherwise it will not recognised, and make the list massive. 
+    #s_thing_widget(soup)#
+    #s_comments(soup, index)#
+    #print page_dict
     #print str(page_dict)
-    return page_dict
+    print "**"+str(index)+"**"
+    return pagedict
     #page_insert_derived(page_dict, index)
 #################################
 
