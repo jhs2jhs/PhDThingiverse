@@ -425,6 +425,9 @@ def s_made_derived_new(soup, page_dict):
                                         print 'each made page is not available'
                                     soup_made = BeautifulSoup(content)
                                     made_lists = soup_made.findAll('div', attrs={'class':'things'})
+                                    if len(made_lists) == 0:
+                                        print "hello:::::::::::::::::::", made_lists
+                                        continue
                                     for li in made_lists[0].contents:
                                         if type(li) == Tag:
                                             #print ".........."
@@ -520,7 +523,9 @@ def page_insert_derived(page_dict, index):
             #db_insert.derived_insert_new(x_url, y_url)
         #print "======== derived ==========="
 
-def content_script_derived(content, index):
+def content_script_derived(content, req):
+    index = req.strip('\n\thttp://www.thingiverse.com/thing:')
+    index = int(index)
     soup = BeautifulSoup(content)
     print "**"+str(index)+"**"
     page_dict = {}
