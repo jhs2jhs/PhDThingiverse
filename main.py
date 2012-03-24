@@ -23,12 +23,13 @@ def web_reading():
     print "** web_reading finish **"
 
 def web_reading_threads():
-    for index in range(20):
-        start = 53#index*100
-        end = 62#(index+1)*100
-        links = ['http://www.thingiverse.com/thing:%d' %i for i in range (start, end)]
-        fetch.fetchio_multi(links, 10, web_read.content_scripting, web_processor.page_processing)
-        print " === finish %d to %d ==="%(start, end)
+    fetch.fetch_multi_once_thread_pool(200, 100, 50, web_read.content_scripting, web_processor.page_processing)
+    #for index in range(20):
+    #    start = index*10
+    #    end = (index+1)*10
+    #    links = ['http://www.thingiverse.com/thing:%d' %i for i in range (start, end)]
+    #    fetch.fetchio_multi(links, 5, web_read.content_scripting, web_processor.page_processing)
+    #    print " === finish %d to %d ==="%(start, end)
         
     #links = ['http://www.thingiverse.com/thing:%d' %i for i in range (1, 20000)]
     #fetch.fetchio_multi(links, 50, web_read.content_scripting, web_processor.page_processing)

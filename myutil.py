@@ -42,6 +42,8 @@ class page_dict_label:
 
     thing_mades = 'thing_mades'
     made_url = 'thing_made_url'
+    made_time = 'thing_made_time'
+    made_author_url = 'thing_made_author_url'
     thing_deriveds = 'thing_deriveds'
     derived_url = 'thing_derived_url'
     

@@ -6,7 +6,7 @@ import web_read
 import socket
 
 stack_size(32768*16)
-socket.setdefaulttimeout(60) # 10 second
+socket.setdefaulttimeout(10) # 10 second
 
 class Fetcher:
     def __init__(self, threads, get_retrives, web_processor):
@@ -52,7 +52,7 @@ class Fetcher:
             return
         except urllib2.URLError, what:
             if retries > 0:
-                #print "retries:", retries
+                print "retries:", retries
                 time.sleep(0.1)
                 return self.webget(req, retries-1)
             else:
@@ -133,7 +133,11 @@ class FetcherIO:
                 return self.webget(req, retries-1)
             else:
                 self.q_req.put(req)
+                print "99999999999999:", req
                 return {}
+        except Exception, what:
+            print what
+            return {}
         #return ans
  
     def threadget(self):
@@ -142,7 +146,7 @@ class FetcherIO:
             with self.lock: #critical area
                 self.running += 1
             out = self.webget(req, self.get_retrives)
-            self.q_ans.put((req,out))
+            self.q_ans.put((req, out))
             with self.lock:
                 self.running -= 1
             self.q_req.task_done()
@@ -154,7 +158,7 @@ def single_get(ans, req):
 def fetchio_single(url): # need to be modify
     f = FetcherIO(threads=1, get_retrives=3, web_scriptor=single_get)
     f.push(url)
-    #content = {}
+    content = {}
     while f.taskleft():
         url, content = f.pop()
     if content.has_key('content'):
@@ -166,8 +170,25 @@ def fetchio_multi(links, threads, web_scriptor, web_processor):
     f = FetcherIO(threads=threads, get_retrives=3, web_scriptor=web_scriptor)
     for url in links:
         f.push(url)
+    print f.taskleft()
     while f.taskleft():
         url, pagedict = f.pop()
+        #print url
+        web_processor(pagedict, url)
+
+def fetch_multi_once_thread_pool(times, interval, threads, web_scriptor, web_processor):
+    f = FetcherIO(threads=threads, get_retrives=3, web_scriptor=web_scriptor)
+    #for url in links:
+    #    f.push(url)
+    for index in range(times):
+        start = index*interval
+        end = (index+1)*interval
+        for url in ['http://www.thingiverse.com/thing:%d' %i for i in range (start, end)]:
+            f.push(url)
+        print " === finish %d to %d ==="%(start, end)
+    while f.taskleft():
+        url, pagedict = f.pop()
+        #print url
         web_processor(pagedict, url)
 
 

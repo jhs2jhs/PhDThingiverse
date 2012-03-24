@@ -418,7 +418,21 @@ def s_made(soup, page_dict):
                     print what
                     continue
         if len(mades) > 0:
-            page_dict[pdl.thing_mades] = mades
+            mades_author_urls = []
+            for m in mades:
+                made_url = m[pdl.made_url]
+                response, content = fetch.fetchio_single(made_url)
+                soup_made_author_url = BeautifulSoup(content)
+                lists = soup_made_author_url.findAll('div', attrs={'class':'byline'})
+                try:
+                    made_time = lists[0].contents[1].contents[2].strip('onby')
+                    made_time = made_time.strip()
+                    made_author_url = lists[0].contents[3]['href']
+                    mades_author_urls.append({pdl.made_url:made_url, pdl.made_time:made_time, pdl.made_author_url:made_author_url})
+                except Exception, what:
+                    print what
+                    continue
+            page_dict[pdl.thing_mades] = mades_author_urls
         if len(deriveds) > 0:
             page_dict[pdl.thing_deriveds] = deriveds
 
@@ -433,6 +447,7 @@ def content_scripting(content, req):
     if pagedict[pdl.thing_error] == 0:
         return
     s_thing_meta(soup, pagedict)
+    #print pagedict
     pagedict[pdl.thing_index] = index
     #print pagedict, "==="
     s_work_in_progress(soup, pagedict)

@@ -18,9 +18,8 @@ CREATE TABLE IF NOT EXISTS thing (
   url TEXT UNIQUE NOT NULL,
   status INTEGER NOT NULL DEFAULT 1, -- 1 is finished, 0 is working in progress
   name TEXT, 
-  author_id INTEGER NOT NULL,
-  created_time TEXT,
-  FOREIGN KEY (author_id) REFERENCES people(id)
+  author_url TEXT NOT NULL,
+  created_time TEXT
 );
 CREATE TABLE IF NOT EXISTS description (
   id INTEGER PRIMARY KEY AUTOINCREMENT, 
@@ -76,9 +75,8 @@ CREATE TABLE IF NOT EXISTS made (
   thing_id INTEGER NOT NULL,
   url TEXT,
   made_time TEXT,
-  made_author_id INTEGER NOT NULL,
-  FOREIGN KEY (thing_id) REFERENCES thing(id),
-  FOREIGN KEY (made_author_id) REFERENCES people(id)
+  made_author_url TEXT NOT NULL,
+  FOREIGN KEY (thing_id) REFERENCES thing(id)
 );
 CREATE TABLE IF NOT EXISTS derived (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -92,8 +90,7 @@ CREATE TABLE IF NOT EXISTS made_raw (
   x_url TEXT,
   y_url TEXT,
   made_time TEXT,
-  made_author_id INTEGER NOT NULL,
-  FOREIGN KEY (made_author_id) REFERENCES people(id),
+  made_author_url TEXT NOT NULL,
   UNIQUE(x_url, y_url)
 );
 CREATE TABLE IF NOT EXISTS derived_raw (
@@ -106,10 +103,9 @@ CREATE TABLE IF NOT EXISTS derived_raw (
 CREATE TABLE IF NOT EXISTS like (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   thing_id INTEGER NOT NULL,
-  follower_id INTEGER NOT NULL,
+  follower_url TEXT NOT NULL,
   FOREIGN KEY (thing_id) REFERENCES thing(id),
-  FOREIGN KEY (follower_id) REFERENCES people(id),
-  UNIQUE (thing_id, follower_id)
+  UNIQUE (thing_id, follower_url)
 );
 CREATE TABLE IF NOT EXISTS license (
   id INTEGER PRIMARY KEY AUTOINCREMENT,

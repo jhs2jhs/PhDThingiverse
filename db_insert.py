@@ -74,9 +74,9 @@ def people_check(url):
     c.close()
 
 
-def thing_insert(url, status, name, author_id, created_time):# default value for status is 1 which is in finished status
-    sql_i = 'INSERT OR IGNORE INTO thing (url, status, name, author_id, created_time) VALUES (?,?,?,?,?)'
-    param = (url, status, name, author_id, created_time, )
+def thing_insert(url, status, name, author_url, created_time):# default value for status is 1 which is in finished status
+    sql_i = 'INSERT OR IGNORE INTO thing (url, status, name, author_url, created_time) VALUES (?,?,?,?,?)'
+    param = (url, status, name, author_url, created_time, )
     #print param
     c = conn.cursor()
     c.execute(sql_i, param)
@@ -157,10 +157,10 @@ def tag_insert(thing_id, tag_name):
         sys.error('tag is not exisitng in database file')
     c.close()
 
-def like_insert(thing_id, follower_id):
-    sql_i = 'INSERT INTO like (thing_id, follower_id) VALUES (?, ?)'
+def like_insert(thing_id, follower_url):
+    sql_i = 'INSERT OR IGNORE INTO like (thing_id, follower_url) VALUES (?, ?)'
     c = conn.cursor()
-    param = (thing_id, follower_id,)
+    param = (thing_id, follower_url,)
     #print param
     c.execute(sql_i, param)
     conn.commit()
@@ -175,9 +175,10 @@ def license_insert(thing_id, license_url):
     sql_i = 'SELECT id FROM license WHERE url = ?'
     param = (license_url, )
     c.execute(sql_i, param)
-    license_id = c.fetchone()[0]
-    if license_id:
-        sql_i = 'INSERT INTO thing_license (thing_id, license_id) VALUES (?,?)'
+    license_id = c.fetchone()
+    if license_id and license_id[0]:
+        license_id = license_id[0]
+        sql_i = 'INSERT OR IGNORE INTO thing_license (thing_id, license_id) VALUES (?,?)'
         param = (thing_id, license_id, )
         #print param
         c.execute(sql_i, param)
@@ -202,7 +203,19 @@ def derived_insert(x_url, y_url):
     conn.commit()
     c.close()
 
-def made_insert(x_url, y_url):
+def made_insert(x_url, y_url, made_time, made_author_url):
+     sql_i = 'INSERT OR IGNORE INTO made_raw (x_url, y_url, made_time, made_author_url) VALUES (?,?,?,?)'
+     c = conn.cursor()
+     param = (x_url, y_url, made_time, made_author_url, )
+        #print param
+     c.execute(sql_i, param)
+     conn.commit()
+        #print "*******"
+     c.close()
+    #sql_i = 'INSERT OR IGNORE INTO 
+
+'''
+def made_insert(x_url, y_url, made_time, made_author_url):
     url = y_url;
     print "**", url, "**"
     response, content = fetch.fetchio_single(url)
@@ -219,14 +232,15 @@ def made_insert(x_url, y_url):
         made_author = lists[0].contents[3]['href']
         made_author_id = people_check(made_author)
         #print made_author
-        sql_i = 'INSERT OR IGNORE INTO made_raw (x_url, y_url, made_time, made_author_id) VALUES (?,?,?,?)'
+        sql_i = 'INSERT OR IGNORE INTO made_raw (x_url, y_url, made_time, made_author_url) VALUES (?,?,?,?)'
         c = conn.cursor()
-        param = (x_url, y_url, made_time, made_author_id, )
+        param = (x_url, y_url, made_time, made_author_url, )
         #print param
         c.execute(sql_i, param)
         conn.commit()
         #print "*******"
         c.close()
+'''
     
 
     
