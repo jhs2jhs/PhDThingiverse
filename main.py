@@ -23,7 +23,7 @@ def web_reading():
     print "** web_reading finish **"
 
 def web_reading_threads():
-    fetch.fetch_multi_once_thread_pool(200, 100, 50, web_read.content_scripting, web_processor.page_processing)
+    fetch.fetch_multi_once_thread_pool(200, 100, 100, web_read.content_scripting, web_processor.page_processing)
     #for index in range(20):
     #    start = index*10
     #    end = (index+1)*10

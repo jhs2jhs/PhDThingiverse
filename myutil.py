@@ -20,8 +20,8 @@ class page_dict_label:
     description = 'thing_description'
 
     thing_images = 'thing_gallery_image'
-    thing_image_url = 'url'
-    thing_image_type = 'type'
+    thing_image_url = 'image_url'
+    thing_image_type = 'image_type'
 
     thing_files = 'thing_files'
     file_date = 'file_date'

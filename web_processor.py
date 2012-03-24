@@ -52,6 +52,8 @@ def page_processing(pagedict, req):
         db_insert.license_insert(thing_id, thing_license)
     if pagedict.has_key(pdl.thing_mades):
         for m in pagedict[pdl.thing_mades]:
+            if m.has_key(pdl.made_time) and m.has_key(pdl.made_author_url) and m.has_key(pdl.made_url):
+                continue
             made_time = m[pdl.made_time]
             made_author_url = m[pdl.made_author_url]
             y_url = m[pdl.made_url]

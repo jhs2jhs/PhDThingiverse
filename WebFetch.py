@@ -4,9 +4,26 @@ import urllib2
 from threading import Thread, Lock, stack_size
 import web_read
 import socket
+import db_insert
 
 stack_size(32768*16)
 socket.setdefaulttimeout(10) # 10 second
+
+error_queue = Queue()
+def error_queue_put(e):
+    global error_queue
+    error_queue.put(e)
+def error_queue_pop():
+    global error_queue
+    e = error_queue.pop()
+    return e
+def error_queue_insert():
+    global error_queue
+    while error_queue.qsize() > 0:
+        e = error_queue_pop()
+        url, msg = e
+        db_insert.error_log(url, msg)
+    print "finish error_queue_insert"
 
 class Fetcher:
     def __init__(self, threads, get_retrives, web_processor):
@@ -152,6 +169,8 @@ class FetcherIO:
             self.q_req.task_done()
             time.sleep(0.1) # don't spam
 
+# this option is with thread, keep it, but sometime will cause too many thread created. therefore, i have to come following non threaed msg
+'''
 def single_get(ans, req):
     return {'content':ans}
 
@@ -165,6 +184,52 @@ def fetchio_single(url): # need to be modify
         return (url, content['content'])
     else:
         return (url, '')
+'''
+
+
+def webget_retries(req, retries):
+    try:
+        opener = urllib2.build_opener(urllib2.HTTPHandler)
+        ans = opener.open(req).read()
+        return {'content':ans}
+    except urllib2.HTTPError as what:
+        url = req
+        msg = what
+        #db_insert.error_log(url, msg)
+        error_queue_put((url, msg))
+        return {}
+    except urllib2.URLError as what:
+        if retries > 0:
+            url = req
+            msg = 'retries:'+str(retries)
+            #db_insert.error_log(url, msg)
+            error_queue_put((url, msg))
+            time.sleep(0.1)
+            return webget_retries(req, retries-1)
+        else:
+            url = req
+            msg = what
+            #db_insert.error_log(url, msg)
+            error_queue_put((url, msg))
+            print "99999999999999:", req
+            return {}
+    except Exception as what:
+        url = req
+        msg = what
+        #db_insert.error_log(url, msg)
+        error_queue_put((url, msg))
+        print what
+        return {}
+        #return ans
+    #return (req, content['content'])
+
+def fetchio_single(url):
+    content = webget_retries(url, 3)
+    if content.has_key('content'):
+        return (url, content['content'])
+    else:
+        return (url, '')
+    
 
 def fetchio_multi(links, threads, web_scriptor, web_processor):
     f = FetcherIO(threads=threads, get_retrives=3, web_scriptor=web_scriptor)
@@ -175,6 +240,7 @@ def fetchio_multi(links, threads, web_scriptor, web_processor):
         url, pagedict = f.pop()
         #print url
         web_processor(pagedict, url)
+    error_queue_insert()
 
 def fetch_multi_once_thread_pool(times, interval, threads, web_scriptor, web_processor):
     f = FetcherIO(threads=threads, get_retrives=3, web_scriptor=web_scriptor)
@@ -190,6 +256,7 @@ def fetch_multi_once_thread_pool(times, interval, threads, web_scriptor, web_pro
         url, pagedict = f.pop()
         #print url
         web_processor(pagedict, url)
+    error_queue_insert()
 
 
 if __name__ == "__main__":
