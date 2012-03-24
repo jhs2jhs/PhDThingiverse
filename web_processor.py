@@ -60,3 +60,4 @@ def page_processing(pagedict, req):
             print (x_url, y_url)
             db_insert.derived_insert(x_url, y_url)
         #print "======== derived ==========="
+    print "== finish %d =="%index

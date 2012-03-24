@@ -345,7 +345,8 @@ def s_made(soup, page_dict):
                                                 #print '+++++++++++++++'
                                                 break
                                             made_href = li.contents[1].contents[1]['href']
-                                            #print derived_href
+                                            #print made_href
+                                            made_href = page_url_root+made_href
                                             mades.append({pdl.made_url:made_href})
                         else:
                             lists_made = l.contents[3].contents
