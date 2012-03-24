@@ -394,11 +394,11 @@ def s_made_derived_new(soup, page_dict):
         deriveds = []
         for l in lists:
             if l.contents[1].contents[0] == "Who's Made It?":
-                if l.contents[5]:
+                try:
                     if l.contents[5].contents[0]:
                         made_count = l.contents[5].contents[0].strip('\n\tView all copies')
                         #print l.contents[5].contents
-                        print made_count
+                        #print made_count
                         made_count = int(made_count)
                         if made_count >= 20:
                             made_lists_url = l.contents[5]['href']
@@ -426,7 +426,7 @@ def s_made_derived_new(soup, page_dict):
                                     soup_made = BeautifulSoup(content)
                                     made_lists = soup_made.findAll('div', attrs={'class':'things'})
                                     if len(made_lists) == 0:
-                                        print "hello:::::::::::::::::::", made_lists
+                                        #print "hello:::::::::::::::::::", made_lists
                                         continue
                                     for li in made_lists[0].contents:
                                         if type(li) == Tag:
@@ -438,17 +438,20 @@ def s_made_derived_new(soup, page_dict):
                                             made_href = li.contents[1].contents[1]['href']
                                             #print derived_href
                                             mades.append({pdl.made_url:made_href})
-                    else:
-                        lists_made = l.contents[3].contents
-                        for lm in lists_made:
-                            if type(lm) == Tag:
+                        else:
+                            lists_made = l.contents[3].contents
+                            for lm in lists_made:
+                                if type(lm) == Tag:
                         #print lm
-                                made_href = lm.contents[1]['href']
-                                mades.append({pdl.made_url:made_href})
+                                    made_href = lm.contents[1]['href']
+                                    mades.append({pdl.made_url:made_href})
                         #print made_href
                         #print "**********"
+                except Exception, what:
+                    print what
+                    continue
             if l.contents[1].contents[0] == "Who's Derived It?":
-                if l.contents[5]:
+                try:
                     if l.contents[5].contents[0]:
                         derivation_count = l.contents[5].contents[0].strip('\n\tView all variations')
                         derivation_count = int(derivation_count)
@@ -479,6 +482,8 @@ def s_made_derived_new(soup, page_dict):
                                         print 'each derivation page is not available'
                                     soup_derived = BeautifulSoup(content)
                                     derived_lists = soup_derived.findAll('div', attrs={'class':'things'})
+                                    if len(derived_lists) == 0:
+                                        continue
                                     for li in derived_lists[0].contents:
                                         if type(li) == Tag:
                                             #print ".........."
@@ -501,18 +506,23 @@ def s_made_derived_new(soup, page_dict):
                                     deriveds.append({pdl.derived_url:derived_href})
                         #print derived_href
                         #print "***=========="
+                except Exception, what:
+                    print what
+                    continue
         if len(mades) > 0:
             page_dict[pdl.thing_mades] = mades
         if len(deriveds) > 0:
             page_dict[pdl.thing_deriveds] = deriveds
 
-def page_insert_derived(page_dict, index):
+def page_insert_derived(page_dict, req):
+    index = req.strip('\n\thttp://www.thingiverse.com/thing:')
+    index = int(index)
     if page_dict.has_key(pdl.thing_mades):
         for m in page_dict[pdl.thing_mades]:
             y_url = m[pdl.made_url]
             x_url = '/thing:'+str(index)
             print (x_url, y_url), "==="
-            #db_insert.made_insert_new(x_url, y_url)
+            db_insert.made_insert_new(x_url, y_url)
         #print "======== copy ==========="
     if page_dict.has_key(pdl.thing_deriveds):
         #print "***&&&&&&:"+str(len(page_dict[pdl.thing_deriveds]))
@@ -520,7 +530,7 @@ def page_insert_derived(page_dict, index):
             y_url = d[pdl.derived_url]
             x_url = '/thing:'+str(index)
             print (x_url, y_url)
-            #db_insert.derived_insert_new(x_url, y_url)
+            db_insert.derived_insert_new(x_url, y_url)
         #print "======== derived ==========="
 
 def content_script_derived(content, req):
@@ -531,7 +541,8 @@ def content_script_derived(content, req):
     page_dict = {}
     s_made_derived_new(soup, page_dict) #list has to passed into method, otherwise it will not recognised, and make the list massive. 
     #print str(page_dict)
-    page_insert_derived(page_dict, index)
+    return page_dict
+    #page_insert_derived(page_dict, index)
 #################################
 
 def page_read(index):

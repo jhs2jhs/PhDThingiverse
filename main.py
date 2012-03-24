@@ -2,6 +2,7 @@ import web_read
 import db_init
 import db_insert
 import db_analysis
+import WebFetch as fetch
 
 def db_initing():
     print "** db_initing **"
@@ -20,11 +21,18 @@ def web_reading():
     #web_read.page_read(17773)
     print "** web_reading finish **"
 
+def web_reading_threads():
+    links = ['http://www.thingiverse.com/thing:%d' %i for i in range (1, 20000)]
+    fetch.fetchio_multi(links, 50, web_read.content_script_derived, web_read. page_insert_derived)
+    
+
 def db_analysising():
     db_analysis.test()
+
 
 if __name__ == "__main__":
     print "** main start **"
     db_initing()
-    web_reading()
+    #web_reading()
+    web_reading_threads()
     #db_analysising()
