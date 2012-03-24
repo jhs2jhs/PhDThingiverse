@@ -514,24 +514,7 @@ def s_made_derived_new(soup, page_dict):
         if len(deriveds) > 0:
             page_dict[pdl.thing_deriveds] = deriveds
 
-def page_insert_derived(page_dict, req):
-    index = req.strip('\n\thttp://www.thingiverse.com/thing:')
-    index = int(index)
-    if page_dict.has_key(pdl.thing_mades):
-        for m in page_dict[pdl.thing_mades]:
-            y_url = m[pdl.made_url]
-            x_url = '/thing:'+str(index)
-            print (x_url, y_url), "==="
-            db_insert.made_insert_new(x_url, y_url)
-        #print "======== copy ==========="
-    if page_dict.has_key(pdl.thing_deriveds):
-        #print "***&&&&&&:"+str(len(page_dict[pdl.thing_deriveds]))
-        for d in page_dict[pdl.thing_deriveds]:
-            y_url = d[pdl.derived_url]
-            x_url = '/thing:'+str(index)
-            print (x_url, y_url)
-            db_insert.derived_insert_new(x_url, y_url)
-        #print "======== derived ==========="
+
 
 def content_script_derived(content, req):
     index = req.strip('\n\thttp://www.thingiverse.com/thing:')
@@ -544,56 +527,6 @@ def content_script_derived(content, req):
     return page_dict
     #page_insert_derived(page_dict, index)
 #################################
-
-def page_read(index):
-    #url_root = 'http://www.thingiverse.com/thing:'
-    url = page_url_root+'/thing:'+str(index)
-    response, content = http.request(url, 'GET')
-    if int(response['status']) != 200:
-        print "**** status error when reading page: "+response['status']
-        return 
-    #content_script(content, index) # this is the normal command
-    content_script_derived(content, index)
-
-def page_loop(index_start, index_end):
-    for i in range(index_start, index_end+1, 1): 
-        page_read(i)
-    print "finish loop page reading"
-        
-
-class page_read_thread(threading.Thread):
-    def __init__(self, queue):
-        threading.Thread.__init__(self)
-        self.queue = queue
-
-    def run(self):
-        #global page_url_root
-        page_url_root = 'http://www.thingiverse.com'
-        while True:
-            index = self.queue.get()
-            #print index
-            url = page_url_root+'/thing:'+str(index)
-            print url
-            response, content = http.request(url, 'GET')
-'''
-            if int(response['status']) != 200:
-                print "** thing:"+str(index)+" :status error when reading page: "+response['status']
-                return 
-    #content_script(content, index) # this is the normal command
-            content_script_derived(content, index)
-            self.queue.task_done()
-'''
-        
-def page_loop_threads(index_start, index_end):
-    for index in range(index_start, index_end+1, 1):
-        t = page_read_thread(queue)
-        t.setDaemon(True)
-        t.start()
-
-    for index in range(index_start, index_end+1, 1):
-        queue.put(index)
-
-    queue.join()
 
 
 if __name__ == "__main__":
