@@ -10,6 +10,7 @@ import threading
 import httplib2
 import WebFetch as fetch
 import re
+from datetime import datetime
 
 http = httplib2.Http()
 
@@ -442,11 +443,14 @@ def s_made(soup, page_dict):
 def content_scripting(content, req):
     index = req.strip('\n\thttp://www.thingiverse.com/thing:')
     index = int(index)
-    soup = BeautifulSoup(content)
     pagedict = {}
+    if content == '':
+        print "** read %d on %s**" % (index, str(datetime.now()))
+        return pagedict
+    soup = BeautifulSoup(content)
     s_base_error(soup, index, pagedict)
     if pagedict[pdl.thing_error] == 0:
-        return
+        return pagedict
     s_thing_meta(soup, pagedict)
     #print pagedict
     pagedict[pdl.thing_index] = index
@@ -464,7 +468,8 @@ def content_scripting(content, req):
     #s_comments(soup, index)#
     #print page_dict
     #print str(page_dict)
-    print "**"+str(index)+"**"
+    print "** read %d on %s**" % (index, str(datetime.now()))
+    #print "**"+str(index)+"**"
     return pagedict
     #page_insert_derived(page_dict, index)
 #################################

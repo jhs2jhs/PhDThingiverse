@@ -6,8 +6,8 @@ import web_read
 import socket
 import db_insert
 
-stack_size(32768*16)
-socket.setdefaulttimeout(10) # 10 second
+#stack_size(32768*32)
+socket.setdefaulttimeout(60) # 10 second
 
 error_queue = Queue()
 def error_queue_put(e):

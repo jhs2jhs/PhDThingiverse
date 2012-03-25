@@ -3,26 +3,30 @@ import threading
 import urllib2
 import time
 from BeautifulSoup import BeautifulSoup
+import web_read
+import web_processor
 
-hosts = ["http://yahoo.com", "http://google.com", "http://amazon.com",
-        "http://ibm.com", "http://apple.com"]
+
+hosts = ['http://www.thingiverse.com/thing:%d' %i for i in range (1, 200)]
 
 queue_in = Queue.Queue()
 out_queue = Queue.Queue()
 
 class ThreadUrl(threading.Thread):
     """Threaded Url Grab"""
-    def __init__(self, retrives, queue_in, out_queue):
+    def __init__(self, retrives, queue_in, out_queue, web_scripting):
         threading.Thread.__init__(self)
         self.queue_in = queue_in
         self.out_queue = out_queue
         self.opener = urllib2.build_opener(urllib2.HTTPHandler)
         self.retrives = retrives
+        self.web_scripting = web_scripting
 
     def webget(self, req, retries):
         try:
-            url = urllib2.urlopen(host)
+            url = urllib2.urlopen(req)
             chunk = url.read()
+            #print chunk
             return chunk
         except urllib2.HTTPError as what:
             return ''
@@ -48,7 +52,8 @@ class ThreadUrl(threading.Thread):
             #print url
             #chunk = url.read()
             chunk = self.webget(host, self.retrives) # chunk can be ''
-            pagedict = 
+            #print chunk
+            pagedict = self.web_scripting(chunk, host)
 
             #place chunk into out queue
             self.out_queue.put((host, pagedict))
@@ -59,18 +64,21 @@ class ThreadUrl(threading.Thread):
 
 class DatamineThread(threading.Thread):
     """Threaded Url Grab"""
-    def __init__(self, out_queue):
+    def __init__(self, out_queue, web_processing):
         threading.Thread.__init__(self)
         self.out_queue = out_queue
+        self.web_processing = web_processing
 
     def run(self):
         while True:
             #grabs host from queue
-            chunk = self.out_queue.get()
+            host, pagedict = self.out_queue.get()
+            print pagedict
+            self.web_processing(pagedict, host)
 
             #parse the chunk
-            soup = BeautifulSoup(chunk)
-            print soup.findAll(['title'])
+            #soup = BeautifulSoup(chunk)
+            #print soup.findAll(['title'])
 
             #signals to queue job is done
             self.out_queue.task_done()
@@ -79,8 +87,8 @@ start = time.time()
 def main():
 
     #spawn a pool of threads, and pass them queue instance
-    for i in range(5):
-        t = ThreadUrl(queue_in, out_queue)
+    for i in range(10):
+        t = ThreadUrl(3, queue_in, out_queue, web_read.content_scripting)
         t.setDaemon(True)
         t.start()
 
@@ -88,8 +96,8 @@ def main():
     for host in hosts:
         queue_in.put(host)
 
-    for i in range(5):
-        dt = DatamineThread(out_queue)
+    for i in range(10):
+        dt = DatamineThread(out_queue, web_processor.page_processing)
         dt.setDaemon(True)
         dt.start()
 
