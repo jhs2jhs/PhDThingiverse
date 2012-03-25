@@ -4,6 +4,7 @@ import db_insert
 import db_analysis
 import WebFetch as fetch
 import web_processor
+import dot_gv as gv
 
 def db_initing():
     print "** db_initing **"
@@ -38,10 +39,14 @@ def web_reading_threads():
 def db_analysising():
     db_analysis.test()
 
+def db_gving():
+    #gv.test()
+    gv.derived_x_to_y()
 
 if __name__ == "__main__":
     print "** main start **"
-    db_initing()
+    #db_initing()
     #web_reading()
-    web_reading_threads()
+    #web_reading_threads()
     #db_analysising()
+    db_gving()
