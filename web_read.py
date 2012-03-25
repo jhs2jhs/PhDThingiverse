@@ -9,6 +9,7 @@ import Queue
 import threading
 import httplib2
 import WebFetch as fetch
+import re
 
 http = httplib2.Http()
 

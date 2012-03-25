@@ -11,20 +11,23 @@ socket.setdefaulttimeout(10) # 10 second
 
 error_queue = Queue()
 def error_queue_put(e):
-    global error_queue
-    error_queue.put(e)
+    #global error_queue
+    #error_queue.put(e)
+    pass
 def error_queue_pop():
-    global error_queue
-    e = error_queue.pop()
-    return e
+    #global error_queue
+    #e = error_queue.get()
+    #return e
+    pass
 def error_queue_insert():
-    global error_queue
-    print "start error_queue_insert"
-    while error_queue.qsize() > 0:
-        e = error_queue_pop()
-        url, msg = e
-        db_insert.error_log(url, msg)
-    print "finish error_queue_insert"
+    #global error_queue
+    #print "start error_queue_insert"
+    #while error_queue.qsize() > 0:
+    #    e = error_queue_pop()
+    #    url, msg = e
+    #    db_insert.error_log(url, msg)
+    #print "finish error_queue_insert"
+    pass
 
 class Fetcher:
     def __init__(self, threads, get_retrives, web_processor):
