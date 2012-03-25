@@ -19,6 +19,7 @@ def error_queue_pop():
     return e
 def error_queue_insert():
     global error_queue
+    print "start error_queue_insert"
     while error_queue.qsize() > 0:
         e = error_queue_pop()
         url, msg = e
@@ -116,7 +117,7 @@ class FetcherIO:
         self.opener = urllib2.build_opener(urllib2.HTTPHandler)
         self.lock = Lock() # 
         self.q_req = Queue() #
-        self.q_ans = Queue() #
+        self.q_ans = Queue(threads) #
         self.threads = threads
         for i in range(threads):
             t = Thread(target=self.threadget)
@@ -163,7 +164,7 @@ class FetcherIO:
             with self.lock: #critical area
                 self.running += 1
             out = self.webget(req, self.get_retrives)
-            self.q_ans.put((req, out))
+            self.q_ans.put((req, out), True, None)
             with self.lock:
                 self.running -= 1
             self.q_req.task_done()

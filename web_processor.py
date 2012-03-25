@@ -2,7 +2,7 @@ import db_insert
 from myutil import page_dict_label as pdl
 
 def page_processing(pagedict, req):
-    if len(pagedict) == 0:
+    if not pagedict or len(pagedict) == 0:
         return 
     index = req.strip('\n\thttp://www.thingiverse.com/thing:')
     index = int(index)
@@ -26,12 +26,16 @@ def page_processing(pagedict, req):
         db_insert.instruction_insert(thing_id, instruction)
     if pagedict.has_key(pdl.thing_images):
         for image in pagedict[pdl.thing_images]:
+            if image.has_key(pdl.thing_image_url) and image.has_key(pdl.thing_image_type):
+                continue
             image_url = image[pdl.thing_image_url]
             image_type = image[pdl.thing_image_type]
             db_insert.image_insert(thing_id, image_url, image_type)
     if pagedict.has_key(pdl.thing_files):
         for f in pagedict[pdl.thing_files]:
             #print f
+            if f.has_key(pdl.file_type) and f.has_key(pdl.file_name) and f.has_key(pdl.file_date) and f.has_key(pdl.file_url):
+                continue
             file_type = f[pdl.file_type]
             file_name = f[pdl.file_name]
             file_date = f[pdl.file_date]
@@ -40,10 +44,14 @@ def page_processing(pagedict, req):
             db_insert.file_insert(thing_id, file_type, file_url, file_date, file_name, file_download)
     if pagedict.has_key(pdl.thing_tags):
         for t in pagedict[pdl.thing_tags]:
+            if t.has_key(pdl.tag_name):
+                continue
             tag_name = t[pdl.tag_name]
             db_insert.tag_insert(thing_id, tag_name)
     if pagedict.has_key(pdl.thing_likes):
         for l in pagedict[pdl.thing_likes]:
+            if l.has_key(pdl.follower_url):
+                continue
             follower_url = l[pdl.follower_url]
             #follower_id = db_insert.people_check(follower_url)
             db_insert.like_insert(thing_id, follower_url)
@@ -64,6 +72,8 @@ def page_processing(pagedict, req):
     if pagedict.has_key(pdl.thing_deriveds):
         #print "***&&&&&&:"+str(len(page_dict[pdl.thing_deriveds]))
         for d in pagedict[pdl.thing_deriveds]:
+            if d.has_key(pdl.derived_url):
+                continue
             y_url = d[pdl.derived_url]
             x_url = '/thing:'+str(index)
             #print (x_url, y_url)
