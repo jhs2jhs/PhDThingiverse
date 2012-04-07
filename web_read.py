@@ -460,7 +460,7 @@ def content_scripting(content, req):
     s_thing_files(soup, pagedict)
     s_thing_instruction(soup, pagedict)
     s_thing_tags(soup, pagedict)
-    s_made_one(soup, pagedict)
+    #s_made_one(soup, pagedict)
     s_like(soup, pagedict)
     s_license(soup, pagedict)
     s_made(soup, pagedict) #list has to passed into method, otherwise it will not recognised, and make the list massive. 

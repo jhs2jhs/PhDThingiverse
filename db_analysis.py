@@ -4,33 +4,45 @@ def test():
 sql_derived_from_x_to_y = '''
 SELECT 
   x.id, 
-  x.thing_id, 
-  x.url, 
-  y.thing_id, 
-  y.url
+  x.x_url, 
+  y.y_url
 FROM 
 (SELECT 
-  derived.id,
-  thing.id AS thing_id, 
-  thing.url
-FROM derived, thing
+  derived_raw.id,
+  thing.url AS x_url,
+  thing.name
+FROM derived_raw, thing
 WHERE
-  derived.thing_id = thing.id
+  derived_raw.x_url = thing.url
 ) AS x,
 (SELECT 
-  derived.id, 
-  thing.id AS thing_id, 
-  thing.url
-FROM derived, thing
+  derived_raw.id, 
+  thing.url AS y_url, 
+  thing.name
+FROM derived_raw, thing
 WHERE
-  derived.url = thing.url
+  derived_raw.y_url = thing.url
 ) AS y
 WHERE
   x.id = y.id
 '''
 
+
+'''
+SELECT xy.x_url, xy.y_count, thing.name FROM thing,
+(
+SELECT x_url, COUNT(y_url) AS y_count
+FROM derived_raw
+GROUP BY x_url
+) AS xy
+WHERE thing.url = xy.x_url
+ORDER BY y_count DESC
+LIMIT 100
+'''
+
+
 sql_derived_from_x_to_y = '''
-SELECT * FROM
+SELECT * from  
 (
 SELECT x_url, COUNT(y_url) AS y_count
 FROM derived_raw

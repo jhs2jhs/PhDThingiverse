@@ -5,6 +5,7 @@ import db_analysis
 import WebFetch as fetch
 import web_processor
 import dot_gv as gv
+import db_tree as tree
 
 def db_initing():
     print "** db_initing **"
@@ -43,10 +44,28 @@ def db_gving():
     #gv.test()
     gv.derived_x_to_y()
 
+def db_tree():
+    #tree.test()
+    #tree.get_tree()
+    child_list = tree.get_things_with_multiple_parents()
+    tree_list = tree.get_tree()
+    print len(tree_list)
+    tl = []
+    for t in tree_list:
+        if t not in tl:
+            tl.append(t)
+    print len(tl)
+    parent_list = tree.get_thing_with_multi_parents_root_list(tree_list, child_list)
+    tree_clean = tree.get_tree_individual(tree_list, parent_list)
+    tree.tree_write(tree_clean)
+    
+
+
 if __name__ == "__main__":
     print "** main start **"
     #db_initing()
     #web_reading()
     #web_reading_threads()
     #db_analysising()
-    db_gving()
+    #db_gving()
+    db_tree()
