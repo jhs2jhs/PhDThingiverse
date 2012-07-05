@@ -6,6 +6,9 @@ import WebFetch as fetch
 import web_processor
 import dot_gv as gv
 import db_tree as tree
+import output_text as texts
+import degree
+import people
 
 def db_initing():
     print "** db_initing **"
@@ -58,7 +61,17 @@ def db_tree():
     parent_list = tree.get_thing_with_multi_parents_root_list(tree_list, child_list)
     tree_clean = tree.get_tree_individual(tree_list, parent_list)
     tree.tree_write(tree_clean)
+    tree.thing_check()
     
+def output_text():
+    texts.text_things()
+
+
+def get_degree():
+    degree.get_degree()
+
+def get_people():
+    people.thing_people()
 
 
 if __name__ == "__main__":
@@ -69,3 +82,6 @@ if __name__ == "__main__":
     #db_analysising()
     #db_gving()
     db_tree()
+    #output_text()
+    #get_degree()
+    #get_people()

@@ -275,7 +275,8 @@ def get_tree_individual(tree_list, parent_list):
         #print len(t)
     print "trees has thing numbers larger than %d: %d"%(thing_number, i)
     print "trees with things counts: %s"%(str(thing_counts))
-    #print trees
+    #for tree in trees:
+    #    print tree, '**'
     return trees
 
 #parent_tree = tree_check(tree_list_example, [2, 6, 90])
@@ -313,23 +314,87 @@ def tree_dot(tree_list):
     #print tree_dot_list, '\n\n\n'
     return tree_dot_list, tree_bounds_list
 
+
+net_counts = {} # to varified for the net count of nodes in each tree
+nets = {}
+tree_counts = {}
+tree_duplicate = {}
+
 def tree_write(tree_list):
     txt_list = {}
     txt_bound_list = {}
     for tree in tree_list:
-        #print tree, '\n'
+        #print tree,"**"
         tree_txt, tree_bound = tree_dot(tree) # test tree_bound
-        #print '\n', tree_bound
+        #print len(tree_bound), tree_bound, "**"
+        #print len(tree_txt), tree_txt
         #print len(tree_bound)
         ts = str(tree)
+        #print ts, "****"
         results = re.findall('thing', ts)
+        #print len(results), results, '\n'
         thing_count = len(results) 
         if txt_list.has_key(thing_count):
             txt_list[thing_count] = txt_list[thing_count] + tree_txt
             txt_bound_list[thing_count] = txt_bound_list[thing_count] + [tree_bound]
+            net_counts[thing_count] = net_counts[thing_count] + [tree_txt]
+            #tree_counts[thing_count] = tree_counts[thing_count] + 1
         else:
             txt_list[thing_count] = tree_txt
             txt_bound_list[thing_count] = [tree_bound]
+            net_counts[thing_count] = [tree_txt]
+            nets[thing_count] = {}
+            #tree_counts[thing_count] = 1
+    ######## varification ##############
+    for net_count in net_counts:
+        for count in net_counts[net_count]:
+            #tree_counts[net_count] = tree_counts[net_count] + 1
+            #print tree_counts
+            for c in count:
+                net_results = re.findall('[0-9]+', c)
+                for nr in net_results:
+                    #print nr
+                    if tree_duplicate.has_key(nr):
+                        if tree_duplicate[nr].has_key(net_count):
+                            tree_duplicate[nr][net_count] = tree_duplicate[nr][net_count] + 1
+                        else:
+                            tree_duplicate[nr][net_count] = 1
+                    else:
+                        tree_duplicate[nr] = {}
+                        tree_duplicate[nr][net_count] = 1
+                    #print tree_duplicate
+                    if nets[net_count].has_key(nr):
+                        nets[net_count][nr] = nets[net_count][nr]+1
+                    else:
+                        nets[net_count][nr] = 1
+                    #print nr, nets[net_count][nr]
+                #print net_count, "==",  c, "**"
+    total_0 = 0
+    f = open('./validation/how often a node appear in paths.txt', 'w')
+    f.write('bound_count \tthing_id \tpath_count\n')
+    for ns in nets:
+        #print ns, nets[ns]
+        #print tree_counts[ns]
+        total_1 = 0
+        total_2 = 0
+        for n in nets[ns]:
+            total_1 = total_1 + nets[ns][n]
+            total_2 = total_2 + 1
+            #print ns, n, nets[ns][n]
+            f.write('%s\t%s\t%s\t\n'%(ns, n, nets[ns][n]))
+        total_0 = total_0 + total_2
+        print '\t', ns, '\t', total_2, '\t', total_1
+    f.close()
+    print total_0
+    f = open('./validation/which gv files a node would appear.txt', 'w')
+    f.write('thing_id \t{gv files:appear times}')
+    for td in tree_duplicate:
+        f.write('%s\t%s\n'%(td, tree_duplicate[td]))
+        if len(tree_duplicate[td]) > 1:
+            print '\t', td,'\t',  tree_duplicate[td]
+            #pass
+    f.close()
+    ########## varification #################
     #print txt_list
     for thing_count in txt_list:
         f = open('./tree/results/no_board/thing_count_%s.gv'%(str(thing_count)), 'w')
@@ -345,7 +410,7 @@ def tree_write(tree_list):
         f.write('strict digraph graphname {\n')
         trees = txt_bound_list[thing_count]
         for tree in trees:
-            #print tree, '\n'
+            #print thing_count, '******', tree, '\n'
             for t in tree:
                 #print t, tree[t]
                 f.write('\tsubgraph cluster_%s {\n'%t)
@@ -363,3 +428,30 @@ def tree_write(tree_list):
 #parent_tree = tree_check(tree_list_example, [2, 6, 90])
 #tree_clean = get_tree_individual(tree_list_example, parent_tree)
 #tree_write(tree_clean)
+
+
+sql_derived_thing_all_x = '''
+SELECT x_url FROM derived_raw;
+'''
+sql_derived_thing_all_y = '''
+SELECT y_url FROM derived_raw;
+'''
+
+def thing_check():
+    thing_unique = {}
+    c = conn.cursor()
+    c.execute(sql_derived_thing_all_x, ())
+    for raw in c.fetchall():
+        x = raw[0].strip().replace('/thing:', '')
+        if thing_unique.has_key(x):
+            thing_unique[x] = thing_unique[x]+1
+        else:
+            thing_unique[x] = 1
+    c.execute(sql_derived_thing_all_y, ())
+    for raw in c.fetchall():
+        y = raw[0].strip().replace('/thing:', '')
+        if thing_unique.has_key(y):
+            thing_unique[y] = thing_unique[y]+1
+        else:
+            thing_unique[y] = 1
+    print len(thing_unique)
