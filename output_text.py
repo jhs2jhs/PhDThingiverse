@@ -76,8 +76,8 @@ def text_things():
 
 #### method bellow is the correct one ####
 sql_thing = 'SELECT thing.id, thing.url, thing.name FROM thing'
-sql_desc = 'SELECT id, description FROM description'
-sql_insc = 'SELECT id, instruction FROM instruction'
+sql_desc = 'SELECT thing_id, description FROM description'
+sql_insc = 'SELECT thing_id, instruction FROM instruction'
 things = {}
 def text_things_right():
     c = conn.cursor()
@@ -110,13 +110,13 @@ def text_things_right():
     f.write('thing_id \tthing_url \tthing_title \tthing_tags \tthing_desc \tthing_instruction\n')
     for tid in things:
         thing_url = things[tid]['thing_url'].encode('utf-8')
-        thing_title = things[tid]['thing_title'].encode('utf-8')
+        thing_title = things[tid]['thing_title'].strip().encode('utf-8').replace('\r\n', ' ').replace('\n', ' ').replace('\t', ' ')
         if things[tid].has_key('thing_desc'):
-            thing_desc = things[tid]['thing_desc'].encode('utf-8')
+            thing_desc = things[tid]['thing_desc'].strip().encode('utf-8').replace('\r\n', ' ').replace('\n', ' ').replace('\t', ' ')
         else:
             thing_desc = ''
         if things[tid].has_key('thing_insc'):
-            thing_insc = things[tid]['thing_insc'].encode('utf-8')
+            thing_insc = things[tid]['thing_insc'].strip().encode('utf-8').replace('\r\n', ' ').replace('\n', ' ').replace('\t', ' ')
         else:
             thing_insc = ''
         if thing_url in thing_tags_list:
@@ -124,7 +124,7 @@ def text_things_right():
         else:
             thing_tags = ''
         print tid
-        f.write('%s\t%s\t%s\t%s\t%s\t%s\t\n'%(thing_id, thing_url, thing_title, thing_tags, thing_desc, thing_insc))
+        f.write('%s\t%s\t%s\t%s\t%s\t%s\t\n'%(tid, thing_url, thing_title, thing_tags, thing_desc, thing_insc))
     f.close()
     c.close()
     
