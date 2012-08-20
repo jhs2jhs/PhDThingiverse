@@ -40,8 +40,8 @@ def text_tags():
             thing_tags_list[thing_url] = thing_tag
         #print thing_id, thing_tags_list[thing_id] 
     c.close()
-    for raw in thing_tags_list:
-        print raw, thing_tags_list[raw]
+    #for raw in thing_tags_list:
+    #    print raw, thing_tags_list[raw]
     return thing_tags_list
         
 def text_things():
@@ -71,4 +71,64 @@ def text_things():
         f.write('%s\t%s\t%s\t%s\t%s\t%s\t\n'%(thing_id, thing_url, thing_title, thing_tags, thing_desc, thing_instruction))
     f.close()
     c.close()
+
+
+
+#### method bellow is the correct one ####
+sql_thing = 'SELECT thing.id, thing.url, thing.name FROM thing'
+sql_desc = 'SELECT id, description FROM description'
+sql_insc = 'SELECT id, instruction FROM instruction'
+things = {}
+def text_things_right():
+    c = conn.cursor()
+    sql = sql_thing
+    c.execute(sql, ())
+    for raw in c.fetchall():
+        thing_id = raw[0]
+        thing_url = raw[1]
+        thing_title = raw[2]
+        if not things.has_key(thing_id):
+            things[thing_id] = {}
+        things[thing_id]['thing_id'] = thing_id
+        things[thing_id]['thing_url'] = thing_url
+        things[thing_id]['thing_title'] = thing_title
+    sql = sql_desc
+    c.execute(sql, ())
+    for raw in c.fetchall():
+        thing_id = raw[0]
+        desc = raw[1]
+        things[thing_id]['thing_desc'] = desc
+    sql = sql_insc
+    c.execute(sql, ())
+    for raw in c.fetchall():
+        thing_id = raw[0]
+        insc = raw[1]
+        things[thing_id]['thing_insc'] = insc
+    print len(things)
+    thing_tags_list = text_tags()
+    f = open("./texts/texts_all.txt", 'w')
+    f.write('thing_id \tthing_url \tthing_title \tthing_tags \tthing_desc \tthing_instruction\n')
+    for tid in things:
+        thing_url = things[tid]['thing_url'].encode('utf-8')
+        thing_title = things[tid]['thing_title'].encode('utf-8')
+        if things[tid].has_key('thing_desc'):
+            thing_desc = things[tid]['thing_desc'].encode('utf-8')
+        else:
+            thing_desc = ''
+        if things[tid].has_key('thing_insc'):
+            thing_insc = things[tid]['thing_insc'].encode('utf-8')
+        else:
+            thing_insc = ''
+        if thing_url in thing_tags_list:
+            thing_tags = thing_tags_list[thing_url].encode('utf-8')
+        else:
+            thing_tags = ''
+        print tid
+        f.write('%s\t%s\t%s\t%s\t%s\t%s\t\n'%(thing_id, thing_url, thing_title, thing_tags, thing_desc, thing_insc))
+    f.close()
+    c.close()
+    
+if __name__ == '__main__':
+    text_things_right()
+    
     
